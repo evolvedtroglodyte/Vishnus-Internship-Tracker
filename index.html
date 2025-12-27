@@ -590,6 +590,27 @@
         #resumeFileInput {
             display: none;
         }
+        .remove-resume-btn {
+            display: none;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        .remove-resume-btn:hover {
+            background: #fecaca;
+        }
+        .remove-resume-btn.visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         /* Role Search */
         .role-search-container {
@@ -1165,7 +1186,7 @@
             <div class="powered-by">powered by ChatGPT 4o <button class="reset-key-btn" onclick="resetApiKey()" title="Reset OpenAI API Key">⚙️ Reset API Key</button></div>
             <div class="header-stats">
                 <div class="header-stat">
-                    <div class="header-stat-num">75%</div>
+                    <div class="header-stat-num">90%+</div>
                     <div class="header-stat-label">Target Score</div>
                 </div>
                 <div class="header-stat">
@@ -1424,6 +1445,7 @@
                                 </div>
                                 <input type="file" id="resumeFileInput" accept=".pdf">
                                 <a class="upload-link" id="uploadLink">Upload PDF</a>
+                                <button class="remove-resume-btn" id="removeResumeBtn" onclick="removeResume()" title="Remove resume">✕</button>
                             </div>
                         </div>
                     </div>
@@ -2456,10 +2478,14 @@ The more detail you provide, the better the analysis will be."></textarea>
             e.stopPropagation();
             dropZone.classList.remove('drag-over');
             const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                processResumeFile(files[0]);
-            } else {
-                showMatcherError('Please upload a PDF file.');
+            if (files.length > 0) {
+                const file = files[0];
+                // Check by extension (more reliable than MIME type)
+                if (file.name.toLowerCase().endsWith('.pdf')) {
+                    processResumeFile(file);
+                } else {
+                    showMatcherError('Please upload a PDF file.');
+                }
             }
         });
         dropZone.addEventListener('click', (e) => {
@@ -2582,13 +2608,29 @@ The more detail you provide, the better the analysis will be."></textarea>
     }
 
     function displayResumeInfo() {
+        const removeBtn = document.getElementById('removeResumeBtn');
         if (matcherState.resume) {
             matcherElements.resumeName.textContent = matcherState.resume.fileName;
             matcherElements.resumeName.classList.remove('resume-placeholder');
             const date = new Date(matcherState.resume.uploadedAt).toLocaleDateString();
             matcherElements.resumeMeta.textContent = `Uploaded ${date}`;
             matcherElements.uploadLink.textContent = 'Change';
+            removeBtn.classList.add('visible');
+        } else {
+            matcherElements.resumeName.textContent = 'No resume uploaded';
+            matcherElements.resumeMeta.textContent = 'Drag & drop PDF or click Upload';
+            matcherElements.uploadLink.textContent = 'Upload PDF';
+            removeBtn.classList.remove('visible');
         }
+    }
+
+    function removeResume() {
+        matcherState.resume = null;
+        localStorage.removeItem('resumeMatcherData');
+        matcherElements.resumeFileInput.value = '';
+        displayResumeInfo();
+        updateAnalyzeButton();
+        showMatcherError('');
     }
 
     async function handleResumeUpload(e) {
@@ -2696,14 +2738,20 @@ The more detail you provide, the better the analysis will be."></textarea>
             throw new Error('Please enter your OpenAI API key above before analyzing.');
         }
 
-        const systemPrompt = `You are an expert ATS resume analyzer. Analyze the resume against the job description.
+        const systemPrompt = `You are an elite ATS (Applicant Tracking System) optimization expert and career strategist. Your goal is to help candidates achieve 90-100% ATS match scores.
+
+ANALYSIS METHODOLOGY:
+1. Extract ALL keywords from the job description (skills, tools, certifications, methodologies, soft skills)
+2. Perform exact and semantic matching against the resume
+3. Identify gaps that prevent achieving a 90%+ score
+4. Provide specific, actionable recommendations with copy-paste ready text
 
 RETURN ONLY VALID JSON in this exact format:
 {
   "jobTitle": {
-    "extracted": "<job title from JD>",
+    "extracted": "<exact job title from JD>",
     "foundInResume": true/false,
-    "recommendation": "<action if missing>"
+    "recommendation": "<if missing: exact text to add to resume header or summary>"
   },
   "matchScore": {
     "overall": 0-100,
@@ -2727,18 +2775,32 @@ RETURN ONLY VALID JSON in this exact format:
   "suggestions": [
     {
       "priority": "critical",
-      "impactScore": "+5%",
-      "action": "<specific action>",
-      "section": "Skills",
-      "example": "<exact text to add>",
-      "reason": "<why this matters>"
+      "impactScore": "+X%",
+      "action": "<specific action: add to skills section, integrate into bullet point, add certification, etc.>",
+      "section": "<Skills/Experience/Summary/Education>",
+      "example": "<EXACT copy-paste ready text for the resume>",
+      "reason": "<why this boosts ATS score - be specific about keyword matching>"
     }
   ],
-  "summary": "<2-3 sentence analysis>"
+  "summary": "<2-3 sentence gap analysis focused on path to 90%+ score>"
 }
 
 SCORING WEIGHTS: Hard Skills 40%, Tools 25%, Job Title 15%, Soft Skills 10%, Other 10%
-PRIORITY: critical = 3+ mentions or "required", high = 2 mentions, medium = 1 mention, low = implied`;
+
+PRIORITY CLASSIFICATION:
+- critical: Required/must-have skills, 3+ mentions, or in job title (blocks 90%+)
+- high: Preferred skills, 2 mentions, or prominent placement
+- medium: Nice-to-have, 1 mention
+- low: Implied or industry-standard
+
+SUGGESTION REQUIREMENTS:
+- Provide at least 5 suggestions, prioritized by impact
+- Each suggestion must include EXACT text to add (not vague advice)
+- Focus on quick wins that maximize score improvement
+- Include where to place each addition (Skills section, specific bullet point, summary, etc.)
+- Calculate realistic impact scores
+
+BE THOROUGH: Extract every single keyword from the JD. ATS systems are literal - exact matches matter.`;
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -2750,10 +2812,10 @@ PRIORITY: critical = 3+ mentions or "required", high = 2 mentions, medium = 1 me
                 model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `RESUME:\n${resumeText}\n\nJOB DESCRIPTION:\n${jobDescription}` }
+                    { role: 'user', content: `RESUME:\n${resumeText}\n\nJOB DESCRIPTION:\n${jobDescription}\n\nAnalyze this resume against the job description. Identify ALL keywords and provide specific recommendations to achieve a 90%+ ATS match score.` }
                 ],
-                temperature: 0.3,
-                max_tokens: 2000
+                temperature: 0.2,
+                max_tokens: 3000
             })
         });
 
@@ -2800,18 +2862,18 @@ PRIORITY: critical = 3+ mentions or "required", high = 2 mentions, medium = 1 me
         // Score
         const score = result.matchScore?.overall || 0;
         let scoreClass = 'weak';
-        if (score >= 85) scoreClass = 'excellent';
-        else if (score >= 75) scoreClass = 'good';
-        else if (score >= 65) scoreClass = 'moderate';
+        if (score >= 90) scoreClass = 'excellent';
+        else if (score >= 80) scoreClass = 'good';
+        else if (score >= 70) scoreClass = 'moderate';
 
         matcherElements.scoreCircle.className = `score-circle ${scoreClass}`;
         matcherElements.scoreNumber.textContent = `${score}%`;
         matcherElements.scoreSummary.textContent = result.summary || '';
 
-        // Target indicator
-        const target = 75;
+        // Target indicator (90% target)
+        const target = 90;
         if (score >= target) {
-            matcherElements.targetGap.innerHTML = `<span class="target-met">✓ Above target (${target}%)</span>`;
+            matcherElements.targetGap.innerHTML = `<span class="target-met">✓ Target achieved! (${target}%+)</span>`;
         } else {
             matcherElements.targetGap.innerHTML = `<span class="target-gap">${target - score}% to reach target (${target}%)</span>`;
         }
@@ -2841,8 +2903,8 @@ PRIORITY: critical = 3+ mentions or "required", high = 2 mentions, medium = 1 me
             const data = breakdown[cat.key] || { score: 0 };
             const score = data.score || 0;
             let colorClass = 'weak';
-            if (score >= 75) colorClass = 'excellent';
-            else if (score >= 50) colorClass = 'moderate';
+            if (score >= 85) colorClass = 'excellent';
+            else if (score >= 70) colorClass = 'moderate';
 
             const count = cat.key === 'jobTitle' 
                 ? (data.matched ? '✓' : '✗')
