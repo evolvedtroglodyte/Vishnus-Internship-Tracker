@@ -520,11 +520,36 @@
             padding: 14px 18px;
             border-bottom: 1px solid #e5e5e5;
             background: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .card-title {
             font-size: 1.1rem;
             font-weight: 600;
             color: #1a1a1a;
+        }
+        .refresh-analysis-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 0.85rem;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        .refresh-analysis-btn.visible {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .refresh-analysis-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+            color: #1f2937;
         }
         .card-content {
             padding: 18px;
@@ -1355,6 +1380,12 @@
             }
             .card-header {
                 padding: 12px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .refresh-analysis-btn {
+                font-size: 0.75rem;
+                padding: 5px 10px;
             }
             .card-content {
                 padding: 12px;
@@ -1905,6 +1936,7 @@ The more detail you provide, the better the analysis will be."></textarea>
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">Analysis Results</div>
+                            <button class="refresh-analysis-btn" id="refreshAnalysisBtn" onclick="refreshAnalysis()" title="New Analysis">🔄 New Analysis</button>
                         </div>
                         
                         <!-- Placeholder -->
@@ -2002,7 +2034,7 @@ The more detail you provide, the better the analysis will be."></textarea>
         </div><!-- End matcher-view -->
 
         <div class="footer">
-            <p>Last Updated: December 27, 2025 | Ranked by Company Prestige | Source: SimplifyJobs GitHub</p>
+            <p>Internship List last updated: December 27, 2025 | Ranked by Company Prestige | Source: SimplifyJobs GitHub</p>
         </div>
     </div>
 
@@ -3182,11 +3214,32 @@ PASTE THE FULL JOB DESCRIPTION BELOW (from the job posting):
         matcherElements.resultsPlaceholder.style.display = 'none';
         matcherElements.resultsContent.classList.remove('active');
         document.getElementById('analysisProgress').classList.add('active');
+        document.getElementById('refreshAnalysisBtn').classList.remove('visible');
         resetProgressSteps();
     }
 
     function hideProgress() {
         document.getElementById('analysisProgress').classList.remove('active');
+    }
+
+    function refreshAnalysis() {
+        // Clear analysis result
+        matcherState.analysisResult = null;
+        
+        // Hide results content
+        matcherElements.resultsContent.classList.remove('active');
+        
+        // Hide refresh button
+        document.getElementById('refreshAnalysisBtn').classList.remove('visible');
+        
+        // Show placeholder
+        matcherElements.resultsPlaceholder.style.display = 'flex';
+        
+        // Clear error
+        showMatcherError('');
+        
+        // Update analyze button state
+        updateAnalyzeButton();
     }
 
     function resetProgressSteps() {
@@ -3513,6 +3566,9 @@ Remember: Empty categories are NOT acceptable. If a category seems empty, infer 
     function displayResults(result) {
         matcherElements.resultsPlaceholder.style.display = 'none';
         matcherElements.resultsContent.classList.add('active');
+        
+        // Show refresh button
+        document.getElementById('refreshAnalysisBtn').classList.add('visible');
 
         // Job Title Alert
         const found = result.jobTitle?.foundInResume;
