@@ -1,114 +1,103 @@
 # Summer 2026 Internship Tracker
 
-A curated, searchable database of **369 verified Summer 2026 internship opportunities** with an integrated AI-powered Resume Matcher.
+A comprehensive tracker for **369 verified Summer 2026 internship opportunities** in software engineering, business technology, and related fields.
 
-🔗 **Live Site:** [vishnuanapalli.github.io/internship-tracker](https://evolvedtroglodyte.github.io/Vishnu-Anapalli-Internship-Tracker/)
+**🔗 Live Site:** [vishyfishy3.github.io/internship-tracker-v3](https://vishyfishy3.github.io/internship-tracker-v3)
 
----
+## Features
 
-## 📊 Stats
+- **369 verified roles** across Texas, Remote, Business Technology, and Software Engineering
+- **Prestige-ordered listings** - roles sorted by company prestige within each category
+- **Resume Matcher v2** - AI-powered resume analysis with GPT-4o integration
+- **Mobile responsive** - optimized tables with horizontal scroll on mobile
+- **Direct apply links** - one-click applications to verified job postings
+- **Real-time search** - filter by company, role, or location
 
-| Category | Count | Description |
+## Categories
+
+| Category | Roles | Description |
 |----------|-------|-------------|
-| **Texas** | 32 | TX-based roles (Dallas, Austin, Houston, etc.) |
-| **Remote** | 27 | Remote-eligible positions |
+| **Texas** | 32 | Internships located in Texas |
+| **Remote** | 27 | Remote-friendly positions |
 | **BizTech** | 47 | Business technology, consulting, finance |
-| **SWE** | 263 | Software engineering roles |
-| **Total** | **369** | All verified, open applications |
+| **SWE** | 263 | Software engineering at top tech companies |
 
----
+## Notable Companies
 
-## ✨ Features
+### Elite Quant
+Citadel Securities, Citadel, Hudson River Trading, Jump Trading, Optiver, Tower Research Capital, Virtu Financial
 
-### Internship Tracker
-- **Searchable database** - Filter by company, role, or location
-- **Category sections** - Texas, Remote, BizTech, SWE
-- **Application tracking** - Mark roles as Applied, Interviewing, or Rejected
-- **Direct apply links** - One-click to application pages
-- **Mobile responsive** - Horizontal scroll tables with sticky headers
+### FAANG / Mag 7
+Google, Apple, Amazon, Microsoft, NVIDIA, Netflix, Meta
 
-### Resume Matcher (AI-Powered)
-- **PDF resume upload** - Drag & drop or click to upload
-- **GPT-4o analysis** - AI-powered resume matching
-- **Match scoring** - See compatibility % for each role
-- **Keyword extraction** - Identify skills from your resume
-- **Role recommendations** - Get personalized suggestions
+### Top Tech / AI
+OpenAI, Anthropic, Stripe, Databricks, Scale AI, SpaceX, Palantir, Snowflake, Cloudflare
 
----
+### Unicorns & Growth
+Figma, Notion, Ramp, Discord, Reddit, Coinbase, Robinhood, DoorDash, Instacart
 
-## 🏢 Notable Companies
+### Defense & Aerospace
+Lockheed Martin, Northrop Grumman, Anduril, Shield AI, BAE Systems, SpaceX, Axiom Space
 
-**Quant/Finance:** Citadel Securities, Citadel, Hudson River Trading, Jump Trading, Optiver, Tower Research
+### Autonomous / Robotics
+Aurora, Waymo, Skydio, Zipline, Rivian, GM Cruise, Zoox
 
-**Big Tech:** Google, Microsoft, Amazon, Apple, Meta, NVIDIA, Adobe
+## Data Sources
 
-**Autonomous/Robotics:** Aurora, Skydio, Zoox, Wing, Tesla, Waymo, Shield AI
-
-**Startups:** Replit, Whatnot, Sigma Computing, Sierra, Braze, Benchling
-
----
-
-## 📚 Data Sources
-
-| Source | Stars | Link |
+| Source | Stars | Type |
 |--------|-------|------|
-| SimplifyJobs/Summer2026-Internships | 42.8k | [GitHub](https://github.com/SimplifyJobs/Summer2026-Internships) |
-| vanshb03/Summer2026-Internships | 2.1k | [GitHub](https://github.com/vanshb03/Summer2026-Internships) |
-| speedyapply/2026-SWE-College-Jobs | 6.2k | [GitHub](https://github.com/speedyapply/2026-SWE-College-Jobs) |
-| arunike/Summer-2025-Internship-List | 1.5k | [GitHub](https://github.com/arunike/Summer-2025-Internship-List) |
-| SWEList.com | — | [Website](https://swelist.com) |
+| [SimplifyJobs/Summer2026-Internships](https://github.com/SimplifyJobs/Summer2026-Internships) | ★ 42.8k | Primary aggregator |
+| [vanshb03/Summer2026-Internships](https://github.com/vanshb03/Summer2026-Internships) | ★ 2.1k | Community curated |
+| [speedyapply/2026-SWE-College-Jobs](https://github.com/speedyapply/2026-SWE-College-Jobs) | ★ 6.2k | SWE focused |
+| [arunike/Summer-2025-Internship-List](https://github.com/arunike/Summer-2025-Internship-List) | ★ 1.5k | Cross-referenced |
+| [SWEList.com](https://swelist.com) | - | Job alerts |
 
----
+## Ordering System
 
-## 🚀 Local Development
+Roles within each category are ordered by company prestige, considering:
+- **Compensation** - Higher paying roles ranked higher
+- **Brand recognition** - FAANG, household names
+- **Selectivity** - Difficulty to get hired
+- **Company valuation/stability** - Market cap, funding stage
+
+This helps you quickly identify and prioritize the most competitive opportunities.
+
+## Resume Matcher
+
+The built-in Resume Matcher uses GPT-4o to:
+1. Parse your uploaded resume (PDF)
+2. Extract skills, experience, and education
+3. Match against all 369 roles
+4. Provide a compatibility score (0-100%)
+5. Generate personalized recommendations
+
+**Note:** Requires your own OpenAI API key (stored locally in browser).
+
+## Local Development
 
 ```bash
 # Clone the repository
-git clone https://github.com/evolvedtroglodyte/Vishnu-Anapalli-Internship-Tracker.git
+git clone https://github.com/vishyfishy3/internship-tracker-v3.git
 
 # Open in browser
 open index.html
 ```
 
----
+## Contributing
 
-## 📝 Updating the Tracker
+Found a new internship? Submit a PR or open an issue with:
+- Company name
+- Role title
+- Location
+- Application URL
+- Deadline (if known)
 
-```bash
-cd ~/Desktop/VISH\'S\ PROJECTS/internship-tracker-v3
-# Replace index.html with updated file
-git add .
-git commit -m "Update internship tracker"
-git push origin main
-```
+## License
 
----
-
-## 🛠 Tech Stack
-
-- **Frontend:** HTML, CSS, JavaScript
-- **PDF Parsing:** PDF.js
-- **AI Integration:** OpenAI GPT-4o API
-- **Hosting:** GitHub Pages
-- **Fonts:** Crimson Pro (Google Fonts)
+MIT License - Feel free to fork and customize!
 
 ---
 
-## 📅 Last Updated
+**Built by [Vishnu Anapalli](https://vishnuanapalli.netlify.app)**
 
-**December 27, 2025** - v4 Expansion
-- Added 55 new roles (314 → 369)
-- Added quant finance roles (Citadel, HRT, Jump Trading)
-- Added robotics/autonomous roles (Skydio, Aurora, Zoox)
-- Mobile optimization improvements
-- Sources dropdown in footer
-
----
-
-## 📄 License
-
-MIT License - Feel free to fork and customize for your own use.
-
----
-
-Built by [Vishnu Anapalli](https://vishnuanapalli.netlify.app) | UTD ITSS '27
+*Last updated: December 27, 2025 | 369 verified roles*
