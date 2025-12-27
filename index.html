@@ -91,6 +91,21 @@
             margin-top: -10px;
             margin-bottom: 16px;
         }
+        .reset-key-btn {
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            color: #666;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        .reset-key-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
 
         /* Sections */
         .section {
@@ -360,6 +375,108 @@
         }
         .tracker-view.hidden {
             display: none;
+        }
+
+        /* API Key Management Section */
+        .api-key-section {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+        .api-key-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .api-key-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .api-key-status-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .api-key-status-badge.saved {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .api-key-description {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        .api-key-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .api-key-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+        }
+        .api-key-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+        .api-key-save-btn {
+            padding: 10px 16px;
+            background: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .api-key-save-btn:hover {
+            background: #333;
+        }
+        .api-key-delete-btn {
+            padding: 10px 16px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .api-key-delete-btn:hover {
+            background: #fecaca;
+        }
+        .api-key-show-btn {
+            padding: 10px 12px;
+            background: #f3f4f6;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .api-key-show-btn:hover {
+            background: #e5e7eb;
+        }
+        .api-key-status {
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        .api-key-status.success {
+            color: #166534;
+        }
+        .api-key-status.error {
+            color: #991b1b;
         }
 
         /* Matcher Header Stats */
@@ -1020,6 +1137,10 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Set worker immediately after library loads
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 <body>
     <div class="container">
@@ -1040,7 +1161,7 @@
         <div class="header matcher-view" id="matcherHeader">
             <button class="mode-toggle" onclick="switchToTracker()">Internship Tracker</button>
             <h1>Vish's Resume <span class="title-arrow">➜</span> Job Application Matcher</h1>
-            <div class="powered-by">powered by ChatGPT 4o</div>
+            <div class="powered-by">powered by ChatGPT 4o <button class="reset-key-btn" onclick="resetApiKey()" title="Reset OpenAI API Key">⚙️ Reset API Key</button></div>
             <div class="header-stats">
                 <div class="header-stat">
                     <div class="header-stat-num">75%</div>
@@ -1267,6 +1388,24 @@
              RESUME MATCHER VIEW
              ============================================ -->
         <div class="matcher-view" id="matcherView">
+            <!-- API Key Management Section -->
+            <div class="api-key-section" id="apiKeySection">
+                <div class="api-key-header">
+                    <div class="api-key-title">🔑 OpenAI API Key</div>
+                    <div class="api-key-status-badge" id="apiKeyStatusBadge">No key saved</div>
+                </div>
+                <div class="api-key-description">
+                    Your key is stored locally in your browser only — never sent anywhere except OpenAI.
+                </div>
+                <div class="api-key-input-row">
+                    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-proj-...">
+                    <button class="api-key-save-btn" onclick="saveApiKey()">Save</button>
+                    <button class="api-key-delete-btn" onclick="deleteApiKey()">Delete</button>
+                    <button class="api-key-show-btn" onclick="toggleShowKey()">👁</button>
+                </div>
+                <div class="api-key-status" id="apiKeyStatus"></div>
+            </div>
+
             <div class="main-grid">
                 <!-- Left Panel: Input -->
                 <div class="input-panel">
@@ -2144,16 +2283,99 @@ The more detail you provide, the better the analysis will be."></textarea>
         document.getElementById('matcherView').classList.remove('active');
     }
 
+    function resetApiKey() {
+        deleteApiKey();
+    }
+
+    function saveApiKey() {
+        const input = document.getElementById('apiKeyInput');
+        const statusEl = document.getElementById('apiKeyStatus');
+        const key = input.value.trim();
+        
+        // Don't save if it's the masked value
+        if (key.includes('...')) {
+            statusEl.textContent = 'Enter a new full API key';
+            statusEl.className = 'api-key-status error';
+            return;
+        }
+        
+        if (!key) {
+            statusEl.textContent = 'Please enter an API key';
+            statusEl.className = 'api-key-status error';
+            return;
+        }
+        
+        if (!key.startsWith('sk-')) {
+            statusEl.textContent = 'Invalid key format. Should start with "sk-"';
+            statusEl.className = 'api-key-status error';
+            return;
+        }
+        
+        localStorage.setItem('openai_api_key', key);
+        statusEl.textContent = '✓ Key saved!';
+        statusEl.className = 'api-key-status success';
+        updateApiKeyUI();
+    }
+
+    function deleteApiKey() {
+        localStorage.removeItem('openai_api_key');
+        document.getElementById('apiKeyInput').value = '';
+        document.getElementById('apiKeyStatus').textContent = 'Key deleted';
+        document.getElementById('apiKeyStatus').className = 'api-key-status';
+        updateApiKeyUI();
+    }
+
+    function toggleShowKey() {
+        const input = document.getElementById('apiKeyInput');
+        const btn = document.querySelector('.api-key-show-btn');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁';
+        }
+    }
+
+    function updateApiKeyUI() {
+        const key = localStorage.getItem('openai_api_key');
+        const badge = document.getElementById('apiKeyStatusBadge');
+        const input = document.getElementById('apiKeyInput');
+        
+        if (key) {
+            badge.textContent = '✓ Key saved';
+            badge.className = 'api-key-status-badge saved';
+            // Show masked key
+            input.value = key.substring(0, 7) + '...' + key.substring(key.length - 4);
+            input.placeholder = 'Enter new key to replace';
+        } else {
+            badge.textContent = 'No key saved';
+            badge.className = 'api-key-status-badge';
+            input.value = '';
+            input.placeholder = 'sk-proj-...';
+        }
+    }
+
+    // Clear masked input on focus so user can type new key
+    document.addEventListener('DOMContentLoaded', function() {
+        const apiInput = document.getElementById('apiKeyInput');
+        if (apiInput) {
+            apiInput.addEventListener('focus', function() {
+                if (this.value.includes('...')) {
+                    this.value = '';
+                    this.type = 'password';
+                }
+            });
+        }
+    });
+
+    function getApiKey() {
+        return localStorage.getItem('openai_api_key');
+    }
+
     // ============================================
     // RESUME MATCHER
     // ============================================
-    
-    // PDF.js worker config
-    if (window.location.protocol === 'file:') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-    } else {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
 
     // Matcher State
     const matcherState = {
@@ -2167,6 +2389,16 @@ The more detail you provide, the better the analysis will be."></textarea>
     const matcherElements = {};
 
     function initMatcher() {
+        // Initialize API key section
+        updateApiKeyUI();
+        
+        // Add Enter key support for API key input
+        document.getElementById('apiKeyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveApiKey();
+            }
+        });
+        
         // Cache elements
         matcherElements.resumeDropZone = document.getElementById('resumeDropZone');
         matcherElements.resumeFileInput = document.getElementById('resumeFileInput');
@@ -2392,21 +2624,27 @@ The more detail you provide, the better the analysis will be."></textarea>
             showMatcherError('');
         } catch (error) {
             console.error('PDF parsing error:', error);
-            showMatcherError('Error reading PDF file.');
+            showMatcherError('Error reading PDF: ' + error.message);
         }
     }
 
     async function extractTextFromPDF(file) {
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n';
+        
+        try {
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n';
+            }
+            return fullText.trim();
+        } catch (error) {
+            console.error('PDF.js error:', error);
+            throw new Error('PDF parsing failed: ' + (error.message || 'Unknown error'));
         }
-        return fullText.trim();
     }
 
     function updateAnalyzeButton() {
@@ -2436,7 +2674,7 @@ The more detail you provide, the better the analysis will be."></textarea>
             displayResults(result);
         } catch (error) {
             console.error('Analysis error:', error);
-            showMatcherError('Analysis failed. Please check your API key and try again.');
+            showMatcherError('Error: ' + error.message);
         } finally {
             matcherElements.analyzeBtn.disabled = false;
             matcherElements.analyzeBtn.textContent = 'Analyze Match';
@@ -2445,11 +2683,9 @@ The more detail you provide, the better the analysis will be."></textarea>
     }
 
     async function callOpenAI(resumeText, jobDescription) {
-        let apiKey = localStorage.getItem('openai_api_key');
+        const apiKey = localStorage.getItem('openai_api_key');
         if (!apiKey) {
-            apiKey = prompt('Enter your OpenAI API key (stored locally in your browser, not on server):');
-            if (!apiKey) throw new Error('No API key provided');
-            localStorage.setItem('openai_api_key', apiKey);
+            throw new Error('Please enter your OpenAI API key above before analyzing.');
         }
 
         const systemPrompt = `You are an expert ATS resume analyzer. Analyze the resume against the job description.
@@ -2514,19 +2750,32 @@ PRIORITY: critical = 3+ mentions or "required", high = 2 mentions, medium = 1 me
         });
 
         if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
             if (response.status === 401) {
                 localStorage.removeItem('openai_api_key');
-                throw new Error('Invalid API key - please refresh and try again');
+                updateApiKeyUI();
+                throw new Error('Invalid API key. Please enter a valid key.');
             }
-            throw new Error(`API error: ${response.status}`);
+            throw new Error(errorData.error?.message || `API error: ${response.status}`);
         }
 
         const data = await response.json();
+        
+        if (!data.choices || !data.choices[0]?.message?.content) {
+            throw new Error('Invalid response from OpenAI');
+        }
+        
         let content = data.choices[0].message.content;
         
         // Clean JSON
         content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        return JSON.parse(content);
+        
+        try {
+            return JSON.parse(content);
+        } catch (e) {
+            console.error('JSON parse error:', content);
+            throw new Error('Failed to parse AI response');
+        }
     }
 
     function displayResults(result) {
